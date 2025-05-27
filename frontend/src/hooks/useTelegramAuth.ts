@@ -10,6 +10,7 @@ interface TelegramUser {
   photo_url?: string;
 }
 
+// eslint-disable-next-line
 interface User extends TelegramUser {}
 
 export function useTelegramAuth() {
