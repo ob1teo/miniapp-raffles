@@ -15,28 +15,8 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "title": {
-          "name": "title",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "image_url": {
-          "name": "image_url",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "prize": {
-          "name": "prize",
+        "prize_description": {
+          "name": "prize_description",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -97,45 +77,16 @@
         },
         "telegram_id": {
           "name": "telegram_id",
-          "type": "int",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "integer"
-        },
-        "first_name": {
-          "name": "first_name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "last_name": {
-          "name": "last_name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
           "length": 255,
           "mappedType": "string"
         },
         "username": {
           "name": "username",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "photo_url": {
-          "name": "photo_url",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -222,22 +173,21 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamptz",
+        "tickets_count": {
+          "name": "tickets_count",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
+          "mappedType": "integer"
         }
       },
-      "name": "ticket",
+      "name": "raffle_entry",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "ticket_pkey",
+          "keyName": "raffle_entry_pkey",
           "columnNames": [
             "id"
           ],
@@ -249,24 +199,24 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "ticket_user_id_foreign": {
-          "constraintName": "ticket_user_id_foreign",
+        "raffle_entry_user_id_foreign": {
+          "constraintName": "raffle_entry_user_id_foreign",
           "columnNames": [
             "user_id"
           ],
-          "localTableName": "public.ticket",
+          "localTableName": "public.raffle_entry",
           "referencedColumnNames": [
             "id"
           ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         },
-        "ticket_raffle_id_foreign": {
-          "constraintName": "ticket_raffle_id_foreign",
+        "raffle_entry_raffle_id_foreign": {
+          "constraintName": "raffle_entry_raffle_id_foreign",
           "columnNames": [
             "raffle_id"
           ],
-          "localTableName": "public.ticket",
+          "localTableName": "public.raffle_entry",
           "referencedColumnNames": [
             "id"
           ],

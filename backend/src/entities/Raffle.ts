@@ -5,7 +5,7 @@ import {
   OneToMany,
   Collection,
 } from "@mikro-orm/core";
-import { Ticket } from "./Ticket";
+import { RaffleEntry } from "./RaffleEntry";
 
 @Entity()
 export class Raffle {
@@ -13,20 +13,14 @@ export class Raffle {
   id!: number;
 
   @Property()
-  title!: string;
-
-  @Property()
-  imageUrl!: string;
-
-  @Property()
-  prize!: string;
+  prizeDescription!: string;
 
   @Property()
   endsAt!: Date;
 
-  @Property()
+  @Property({ default: false })
   isFinished: boolean = false;
 
-  @OneToMany(() => Ticket, (ticket) => ticket.raffle)
-  tickets = new Collection<Ticket>(this);
+  @OneToMany(() => RaffleEntry, (entry) => entry.raffle)
+  entries = new Collection<RaffleEntry>(this);
 }

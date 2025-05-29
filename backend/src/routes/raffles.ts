@@ -1,73 +1,113 @@
 import { FastifyInstance } from "fastify";
 import { MikroORM } from "@mikro-orm/core";
-import { Raffle } from "../entities/Raffle";
 import { User } from "../entities/User";
-import { Ticket } from "../entities/Ticket";
+import { Raffle } from "../entities/Raffle";
+import { RaffleEntry } from "../entities/RaffleEntry";
 
-interface RaffleParams {
-  id: string;
-}
-
-interface JoinBody {
-  ticketCount: number;
-  userId: string;
+interface JoinRaffleBody {
+  raffleId: number;
+  telegramId: string;
+  tickets: number;
 }
 
 export default async function raffleRoutes(
   app: FastifyInstance,
   orm: MikroORM,
 ) {
-  const em = orm.em.fork();
+  app.get<{ Params: { telegramId: string } }>(
+    "/raffles/:telegramId",
+    async (req, reply) => {
+      const em = orm.em.fork();
+      const { telegramId } = req.params;
 
-  app.get("/raffles", async (req, reply) => {
-    const now = new Date();
+      const user = await em.findOne(User, { telegramId });
 
-    const raffles = await em.find(
-      Raffle,
-      {
-        endsAt: { $gt: now },
-      },
-      { populate: ["tickets"] },
-    );
+      if (!user) {
+        return reply.status(404).send({ error: "User not found" });
+      }
 
-    const result = raffles.map((raffle) => ({
-      id: raffle.id,
-      title: raffle.title,
-      imageUrl: raffle.imageUrl,
-      endsAt: raffle.endsAt.toISOString(),
-      prize: raffle.prize,
-      totalTickets: raffle.tickets.length,
-      participantCount: new Set(raffle.tickets.map((t) => t.user.id)).size,
-    }));
+      const raffles = await em.find(Raffle, {});
 
-    return result;
+      const result = await Promise.all(
+        raffles.map(async (raffle) => {
+          const entries = await em.find(
+            RaffleEntry,
+            { raffle: raffle.id },
+            { populate: ["user"] },
+          );
+
+          const totalTickets = entries.reduce(
+            (sum, e) => sum + e.ticketsCount,
+            0,
+          );
+
+          const participants = new Set(entries.map((e) => e.user.id)).size;
+
+          const userTickets = entries
+            .filter((e) => e.user.id === user.id)
+            .reduce((sum, e) => sum + e.ticketsCount, 0);
+
+          return {
+            id: raffle.id,
+            title: raffle.prizeDescription,
+            prizeDescription: raffle.prizeDescription,
+            imageUrl: raffle.prizeDescription,
+            endsAt: raffle.endsAt,
+            participants: participants,
+            isFinished: raffle.isFinished,
+            totalTickets,
+            userTickets,
+          };
+        }),
+      );
+
+      return result;
+    },
+  );
+
+  app.post<{ Body: JoinRaffleBody }>("/raffles/join", async (req, reply) => {
+    const { raffleId, telegramId, tickets } = req.body;
+    const em = orm.em.fork();
+
+    if (tickets <= 0) {
+      return reply.status(400).send({ error: "tickets must be > 0" });
+    }
+
+    const user = await em.findOne(User, { telegramId });
+
+    if (!user) {
+      return reply.status(404).send({ error: "User not found" });
+    }
+
+    if (user.ticketBalance < tickets) {
+      return reply.status(400).send({ error: "Not enough ticket balance" });
+    }
+
+    const raffle = await em.findOne(Raffle, {
+      id: raffleId,
+      isFinished: false,
+    });
+
+    if (!raffle) {
+      return reply
+        .status(404)
+        .send({ error: "Raffle not found or already finished" });
+    }
+
+    let entry = await em.findOne(RaffleEntry, { user, raffle });
+
+    if (!entry) {
+      entry = em.create(RaffleEntry, { user, raffle, ticketsCount: 0 });
+    }
+
+    user.ticketBalance -= tickets;
+    entry.ticketsCount += tickets;
+
+    await em.persistAndFlush([user, entry]);
+
+    return {
+      success: true,
+      newTicketBalance: user.ticketBalance,
+    };
   });
-
-  //   app.post<{
-  //     Params: RaffleParams;
-  //     Body: JoinBody;
-  //   }>("/raffles/:id/join", async (req, reply) => {
-  //     const { ticketCount, userId } = req.body;
-  //     const raffleId = Number(req.params.id);
-  //     const em = orm.em.fork();
-  //
-  //     const user = await em.findOne(User, { id: userId });
-  //     const raffle = await em.findOne(Raffle, { id: raffleId });
-  //
-  //     if (!user || !raffle)
-  //       return reply.status(404).send({ error: "User or raffle not found" });
-  //
-  //     if (user.ticketBalance < ticketCount) {
-  //       return reply.status(400).send({ error: "Недостаточно билетов" });
-  //     }
-  //
-  //     for (let i = 0; i < ticketCount; i++) {
-  //       em.persist(new Ticket(user, raffle));
-  //     }
-  //
-  //     user.ticketBalance -= ticketCount;
-  //     await em.flush();
-  //
-  //     return { success: true };
-  //   });
 }

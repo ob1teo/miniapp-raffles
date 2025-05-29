@@ -1,4 +1,11 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  OneToMany,
+  Collection,
+} from "@mikro-orm/core";
+import { RaffleEntry } from "./RaffleEntry";
 
 @Entity()
 export class User {
@@ -6,23 +13,17 @@ export class User {
   id!: number;
 
   @Property({ unique: true })
-  telegramId!: number;
-
-  @Property({ nullable: true })
-  firstName?: string;
-
-  @Property({ nullable: true })
-  lastName?: string;
+  telegramId!: string;
 
   @Property({ nullable: true })
   username?: string;
-
-  @Property({ nullable: true })
-  photoUrl?: string;
 
   @Property({ default: 0 })
   ticketBalance: number = 0;
 
   @Property()
   createdAt = new Date();
+
+  @OneToMany(() => RaffleEntry, (entry) => entry.user)
+  raffleEntries = new Collection<RaffleEntry>(this);
 }
