@@ -1,9 +1,9 @@
 import {
   IRaffle,
+  ApiResponse,
+  ITelegramUser,
   JoinRaffleRequest,
   JoinRaffleResponse,
-  ApiError,
-  ApiResponse,
 } from "./index";
 
 // eslint-disable-next-line
@@ -26,23 +26,23 @@ export namespace Api {
         },
       );
 
-      const json = await resp.json();
+      const data = await resp.json();
 
       if (!resp.ok) {
-        return { error: json?.error || "Unknown error" };
+        return { error: data.error || "Unknown error" };
       }
 
-      return json;
+      return data;
     } catch (err) {
       console.error(`Error with request ${err}`);
       return { error: "Network error" };
     }
   }
 
-  export async function getRaffles(): Promise<IRaffle[]> {
+  export async function getRaffles(telegramId: string): Promise<IRaffle[]> {
     const res = await fetchApi<IRaffle[]>({
       method: "GET",
-      route: "raffles",
+      route: `raffles/${telegramId}`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -57,17 +57,44 @@ export namespace Api {
   }
 
   export async function joinRaffle(
-    input: JoinRaffleRequest,
-  ): Promise<JoinRaffleResponse | ApiError> {
+    body: JoinRaffleRequest,
+  ): Promise<JoinRaffleResponse | { error: string }> {
     const res = await fetchApi<JoinRaffleResponse>({
       method: "POST",
-      route: `raffles/${input.raffleId}/join`,
+      route: "raffles/join",
       headers: {
         "Content-Type": "application/json",
-        "x-user-id": input.userId,
       },
-      body: input,
+      body,
     });
+
+    if ("error" in res) {
+      return { error: res.error };
+    }
+
+    return res;
+  }
+
+  export async function createOrGetUser(body: {
+    telegramId: string;
+    username?: string;
+  }): Promise<{ success: boolean; user?: ITelegramUser; error?: string }> {
+    const res = await fetchApi<{
+      success: boolean;
+      user?: ITelegramUser;
+      error?: string;
+    }>({
+      method: "POST",
+      route: "telegram/auth",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+
+    if ("error" in res) {
+      return { success: false, error: res.error };
+    }
 
     return res;
   }

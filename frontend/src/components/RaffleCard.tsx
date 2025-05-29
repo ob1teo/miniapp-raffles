@@ -10,28 +10,56 @@ import {
   NumberInput,
   Stack,
 } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 
 interface IRaffleCard {
   raffle: IRaffle;
+  onJoined?: () => void;
 }
 
-export const RaffleCard: React.FC<IRaffleCard> = ({ raffle }) => {
+export const RaffleCard: React.FC<IRaffleCard> = ({ raffle, onJoined }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [ticketCount, setTicketCount] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
 
   const handleJoin = async () => {
-    const userId = localStorage.getItem("telegramUserId");
-    if (!userId) return alert("Пользователь не найден");
+    setLoading(true);
+
+    const telegramId = localStorage.getItem("telegramId") || "";
+
+    if (!telegramId) {
+      setLoading(false);
+      return;
+    }
 
     const result = await Api.joinRaffle({
       raffleId: raffle.id,
-      userId,
+      telegramId,
       tickets: ticketCount,
     });
 
-    console.log(result);
+    setLoading(false);
+
+    if ("error" in result) {
+      showNotification({
+        title: "Ошибка",
+        message: result.error,
+        color: "red",
+      });
+    } else {
+      showNotification({
+        title: "Успех",
+        message: "Вы успешно зарегистрировались в раффле!",
+        color: "teal",
+        position: "top-center",
+        autoClose: 3000,
+      });
+
+      close();
+      if (onJoined) onJoined();
+    }
   };
 
   return (
@@ -44,45 +72,46 @@ export const RaffleCard: React.FC<IRaffleCard> = ({ raffle }) => {
         <Group mt="md" mb="xs">
           <Text>{raffle.title}</Text>
         </Group>
-        <Text size="sm" color="dimmed">
-          Total tickets: {raffle.totalTickets}
+        <Text size="sm" c="dimmed">
+          Ваши билеты: {raffle.userTickets}
         </Text>
-        <Text size="sm" color="dimmed">
-          Your tickets: {raffle.userTickets}
+        <Text size="sm" c="dimmed">
+          Всего билетов: {raffle.totalTickets}
         </Text>
-        <Text size="sm" color="dimmed">
-          Participants: {raffle.participantCount}
+        <Text size="sm" c="dimmed">
+          Участники: {raffle.participants}
         </Text>
 
-        <Button
-          variant="light"
-          color="blue"
-          fullWidth
-          mt="md"
-          radius="md"
-          onClick={open}
-        >
-          Участвовать
-        </Button>
+        {!raffle.isFinished ? (
+          <Button
+            variant="light"
+            color="blue"
+            fullWidth
+            mt="md"
+            radius="md"
+            onClick={open}
+            disabled={loading}
+          >
+            Принять участие
+          </Button>
+        ) : (
+          <Text c="dimmed" fw={500} mt="md" ta="center">
+            Розыгрыш завершён
+          </Text>
+        )}
       </Card>
 
-      <Modal
-        opened={opened}
-        onClose={close}
-        title={`Участие в: ${raffle.title}`}
-        centered
-      >
+      <Modal opened={opened} onClose={close} title={`${raffle.title}`} centered>
         <Stack>
           <NumberInput
             label="Количество билетов"
             value={ticketCount}
             onChange={(val) => setTicketCount(Number(val))}
             min={1}
-            max={10}
           />
 
-          <Button fullWidth onClick={handleJoin}>
-            Подтвердить участие
+          <Button fullWidth onClick={handleJoin} loading={loading}>
+            Ввести
           </Button>
         </Stack>
       </Modal>

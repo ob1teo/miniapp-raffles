@@ -1,37 +1,44 @@
+export interface ITelegramUser {
+  id: number;
+  telegramId?: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  photo_url?: string;
+  language_code?: string;
+  ticketBalance?: number;
+}
+
 export interface IRaffle {
-  id: string;
+  id: number;
+  prizeDescription: string;
+  endsAt: string;
+  totalTickets: number;
+  participants: number;
+  isFinished: boolean;
+  userTickets: number;
   title: string;
   imageUrl: string;
-  endsAt: string;
-  prize: string;
-  totalTickets: number;
-  participantCount: number;
-  userTickets: number;
 }
 
-export interface IRaffleStats {
-  raffleId: string;
-  title: string;
-  endsAt: string;
-  totalTickets: number;
-  userTickets: number;
-  participantCount: number;
-}
-
-export interface IUser {
-  id: string;
-  attemptsLeft: number;
+export interface TelegramAuthRequest {
+  initData: string;
 }
 
 export interface JoinRaffleRequest {
-  raffleId: string;
-  userId: string;
+  raffleId: number;
+  telegramId: string;
   tickets: number;
 }
 
 export interface JoinRaffleResponse {
   success: boolean;
-  newAttempts: number;
+  message?: string;
+  updatedTicketBalance?: number;
+}
+
+export interface GetRafflesResponse {
+  raffles: IRaffle[];
 }
 
 export interface ApiError {
