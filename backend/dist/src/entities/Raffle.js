@@ -11,11 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Raffle = void 0;
 const core_1 = require("@mikro-orm/core");
-const Ticket_1 = require("./Ticket");
+const RaffleEntry_1 = require("./RaffleEntry");
 let Raffle = class Raffle {
     constructor() {
         this.isFinished = false;
-        this.tickets = new core_1.Collection(this);
+        this.entries = new core_1.Collection(this);
     }
 };
 exports.Raffle = Raffle;
@@ -26,27 +26,19 @@ __decorate([
 __decorate([
     (0, core_1.Property)(),
     __metadata("design:type", String)
-], Raffle.prototype, "title", void 0);
-__decorate([
-    (0, core_1.Property)(),
-    __metadata("design:type", String)
-], Raffle.prototype, "imageUrl", void 0);
-__decorate([
-    (0, core_1.Property)(),
-    __metadata("design:type", String)
-], Raffle.prototype, "prize", void 0);
+], Raffle.prototype, "prizeDescription", void 0);
 __decorate([
     (0, core_1.Property)(),
     __metadata("design:type", Date)
 ], Raffle.prototype, "endsAt", void 0);
 __decorate([
-    (0, core_1.Property)(),
+    (0, core_1.Property)({ default: false }),
     __metadata("design:type", Boolean)
 ], Raffle.prototype, "isFinished", void 0);
 __decorate([
-    (0, core_1.OneToMany)(() => Ticket_1.Ticket, (ticket) => ticket.raffle),
+    (0, core_1.OneToMany)(() => RaffleEntry_1.RaffleEntry, (entry) => entry.raffle),
     __metadata("design:type", Object)
-], Raffle.prototype, "tickets", void 0);
+], Raffle.prototype, "entries", void 0);
 exports.Raffle = Raffle = __decorate([
     (0, core_1.Entity)()
 ], Raffle);

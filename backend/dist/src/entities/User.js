@@ -11,10 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const core_1 = require("@mikro-orm/core");
+const RaffleEntry_1 = require("./RaffleEntry");
 let User = class User {
     constructor() {
         this.ticketBalance = 0;
         this.createdAt = new Date();
+        this.raffleEntries = new core_1.Collection(this);
     }
 };
 exports.User = User;
@@ -24,24 +26,12 @@ __decorate([
 ], User.prototype, "id", void 0);
 __decorate([
     (0, core_1.Property)({ unique: true }),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], User.prototype, "telegramId", void 0);
 __decorate([
     (0, core_1.Property)({ nullable: true }),
     __metadata("design:type", String)
-], User.prototype, "firstName", void 0);
-__decorate([
-    (0, core_1.Property)({ nullable: true }),
-    __metadata("design:type", String)
-], User.prototype, "lastName", void 0);
-__decorate([
-    (0, core_1.Property)({ nullable: true }),
-    __metadata("design:type", String)
 ], User.prototype, "username", void 0);
-__decorate([
-    (0, core_1.Property)({ nullable: true }),
-    __metadata("design:type", String)
-], User.prototype, "photoUrl", void 0);
 __decorate([
     (0, core_1.Property)({ default: 0 }),
     __metadata("design:type", Number)
@@ -50,6 +40,10 @@ __decorate([
     (0, core_1.Property)(),
     __metadata("design:type", Object)
 ], User.prototype, "createdAt", void 0);
+__decorate([
+    (0, core_1.OneToMany)(() => RaffleEntry_1.RaffleEntry, (entry) => entry.user),
+    __metadata("design:type", Object)
+], User.prototype, "raffleEntries", void 0);
 exports.User = User = __decorate([
     (0, core_1.Entity)()
 ], User);

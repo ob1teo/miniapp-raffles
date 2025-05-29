@@ -3,27 +3,23 @@ import "dotenv/config";
 
 import { Options, PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
+import { ReflectMetadataProvider } from "@mikro-orm/core";
 
 assert(process.env.DATABASE_URL !== undefined);
 
+const isProd = process.env.NODE_ENV === "production";
+
 const config: Options = {
-  // for simplicity, we use the SQLite database, as it's available pretty much everywhere
   driver: PostgreSqlDriver,
-
   clientUrl: process.env.DATABASE_URL,
-
   forceUtcTimezone: true,
 
-  // folder-based discovery setup, using common filename suffix
-  entities: ["dist/src/entities/*.js"],
-  entitiesTs: ["src/entities/*.ts"],
+  entities: [isProd ? "dist/src/entities" : "src/entities"],
+  entitiesTs: isProd ? undefined : ["src/entities"],
 
-  // we will use the ts-morph reflection, an alternative to the default reflect-metadata provider
-  // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
-  metadataProvider: TsMorphMetadataProvider,
+  metadataProvider: isProd ? ReflectMetadataProvider : TsMorphMetadataProvider,
 
-  // enable debug mode to log SQL queries and discovery information
-  debug: true,
+  debug: !isProd,
 };
 
 export default config;

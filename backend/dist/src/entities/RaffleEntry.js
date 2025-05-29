@@ -9,44 +9,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Raffle = void 0;
+exports.RaffleEntry = void 0;
 const core_1 = require("@mikro-orm/core");
-const Ticket_1 = require("./Ticket");
-let Raffle = class Raffle {
-    constructor() {
-        this.isFinished = false;
-        this.tickets = new core_1.Collection(this);
-    }
+const Raffle_1 = require("./Raffle");
+const User_1 = require("./User");
+let RaffleEntry = class RaffleEntry {
 };
-exports.Raffle = Raffle;
+exports.RaffleEntry = RaffleEntry;
 __decorate([
     (0, core_1.PrimaryKey)(),
     __metadata("design:type", Number)
-], Raffle.prototype, "id", void 0);
+], RaffleEntry.prototype, "id", void 0);
+__decorate([
+    (0, core_1.ManyToOne)(() => User_1.User),
+    __metadata("design:type", User_1.User)
+], RaffleEntry.prototype, "user", void 0);
+__decorate([
+    (0, core_1.ManyToOne)(() => Raffle_1.Raffle),
+    __metadata("design:type", Raffle_1.Raffle)
+], RaffleEntry.prototype, "raffle", void 0);
 __decorate([
     (0, core_1.Property)(),
-    __metadata("design:type", String)
-], Raffle.prototype, "title", void 0);
-__decorate([
-    (0, core_1.Property)(),
-    __metadata("design:type", String)
-], Raffle.prototype, "imageUrl", void 0);
-__decorate([
-    (0, core_1.Property)(),
-    __metadata("design:type", String)
-], Raffle.prototype, "prize", void 0);
-__decorate([
-    (0, core_1.Property)(),
-    __metadata("design:type", Date)
-], Raffle.prototype, "endsAt", void 0);
-__decorate([
-    (0, core_1.Property)(),
-    __metadata("design:type", Boolean)
-], Raffle.prototype, "isFinished", void 0);
-__decorate([
-    (0, core_1.OneToMany)(() => Ticket_1.Ticket, (ticket) => ticket.raffle),
-    __metadata("design:type", Object)
-], Raffle.prototype, "tickets", void 0);
-exports.Raffle = Raffle = __decorate([
+    __metadata("design:type", Number)
+], RaffleEntry.prototype, "ticketsCount", void 0);
+exports.RaffleEntry = RaffleEntry = __decorate([
     (0, core_1.Entity)()
-], Raffle);
+], RaffleEntry);
